@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Packet Types - Network QoS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        nav {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        nav a:hover {
+            color: #764ba2;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .packet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .packet-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .packet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .packet-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        .packet-card h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .packet-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow: auto;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .modal h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        .modal p {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        .modal ul {
+            margin-left: 20px;
+            color: #333;
+            line-height: 2;
+        }
+        .priority-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .high { background: #ef4444; }
+        .medium { background: #f59e0b; }
+        .low { background: #10b981; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/">📊 Dashboard</a>
+            <a href="/packets">📦 Packet Types</a>
+            <a href="/simulation">🎯 How It Works</a>
+            <a href="/about">ℹ️ About Project</a>
+        </nav>
+        
+        <h1>📦 Network Packet Types</h1>
+        
+        <div class="packet-grid">
+            <div class="packet-card" onclick="showModal('tcp')">
+                <div class="packet-icon">🔗</div>
+                <h2>TCP Packets</h2>
+                <p>Transmission Control Protocol - Reliable, connection-oriented communication</p>
+                <span class="priority-badge low">Low/Medium Priority</span>
+            </div>
+            
+            <div class="packet-card" onclick="showModal('udp')">
+                <div class="packet-icon">📡</div>
+                <h2>UDP Packets</h2>
+                <p>User Datagram Protocol - Fast, connectionless communication</p>
+                <span class="priority-badge high">High Priority</span>
+            </div>
+            
+            <div class="packet-card" onclick="showModal('http')">
+                <div class="packet-icon">🌐</div>
+                <h2>HTTP/HTTPS</h2>
+                <p>Web traffic - Browsing, APIs, and web services</p>
+                <span class="priority-badge medium">Medium Priority</span>
+            </div>
+            
+            <div class="packet-card" onclick="showModal('rtp')">
+                <div class="packet-icon">📞</div>
+                <h2>RTP Packets</h2>
+                <p>Real-time Protocol - Voice and video streaming</p>
+                <span class="priority-badge high">High Priority</span>
+            </div>
+            
+            <div class="packet-card" onclick="showModal('ftp')">
+                <div class="packet-icon">📁</div>
+                <h2>FTP Packets</h2>
+                <p>File Transfer Protocol - Large file transfers</p>
+                <span class="priority-badge low">Low Priority</span>
+            </div>
+            
+            <div class="packet-card" onclick="showModal('icmp')">
+                <div class="packet-icon">🔍</div>
+                <h2>ICMP Packets</h2>
+                <p>Internet Control Message Protocol - Network diagnostics</p>
+                <span class="priority-badge medium">Medium Priority</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TCP Modal -->
+    <div id="tcp-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('tcp')">&times;</span>
+            <h2>🔗 TCP (Transmission Control Protocol)</h2>
+            <p><strong>Purpose:</strong> TCP provides reliable, ordered, and error-checked delivery of data between applications.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Connection-oriented (3-way handshake)</li>
+                <li>Guaranteed delivery with acknowledgments</li>
+                <li>Flow control and congestion control</li>
+                <li>Packet ordering and retransmission</li>
+            </ul>
+            
+            <p><strong>Common Uses:</strong> Web browsing (HTTP/HTTPS), email (SMTP), file transfer (FTP), remote access (SSH)</p>
+            
+            <p><strong>In Our Router:</strong> TCP packets are typically classified as <strong>Low or Medium Priority</strong> depending on packet size. Large TCP packets (file downloads) get low priority, while small packets (web requests) get medium priority.</p>
+        </div>
+    </div>
+
+    <!-- UDP Modal -->
+    <div id="udp-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('udp')">&times;</span>
+            <h2>📡 UDP (User Datagram Protocol)</h2>
+            <p><strong>Purpose:</strong> UDP provides fast, low-latency communication without guaranteed delivery.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Connectionless protocol</li>
+                <li>No handshake or acknowledgments</li>
+                <li>Minimal overhead and latency</li>
+                <li>No guaranteed delivery or ordering</li>
+            </ul>
+            
+            <p><strong>Common Uses:</strong> Video streaming (YouTube, Netflix), voice calls (Zoom, Skype), online gaming, DNS queries, live broadcasts</p>
+            
+            <p><strong>In Our Router:</strong> Small UDP packets are classified as <strong>High Priority (Real-time)</strong> because they're typically used for time-sensitive applications like video calls where delays are unacceptable.</p>
+        </div>
+    </div>
+
+    <!-- HTTP Modal -->
+    <div id="http-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('http')">&times;</span>
+            <h2>🌐 HTTP/HTTPS (HyperText Transfer Protocol)</h2>
+            <p><strong>Purpose:</strong> HTTP/HTTPS is the foundation of data communication on the World Wide Web.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Request-response protocol (client-server)</li>
+                <li>HTTPS adds encryption (SSL/TLS)</li>
+                <li>Stateless protocol with cookies for sessions</li>
+                <li>Supports various methods (GET, POST, PUT, DELETE)</li>
+            </ul>
+            
+            <p><strong>Common Uses:</strong> Web browsing, REST APIs, web applications, downloading files from websites</p>
+            
+            <p><strong>In Our Router:</strong> HTTP/HTTPS traffic on ports 80/443 is classified as <strong>Medium Priority (Interactive)</strong> when packets are small (requests/responses), or <strong>Low Priority (Bulk)</strong> for large downloads.</p>
+        </div>
+    </div>
+
+    <!-- RTP Modal -->
+    <div id="rtp-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('rtp')">&times;</span>
+            <h2>📞 RTP (Real-time Transport Protocol)</h2>
+            <p><strong>Purpose:</strong> RTP delivers audio and video over IP networks with timing information.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Runs on top of UDP for low latency</li>
+                <li>Includes timestamps and sequence numbers</li>
+                <li>Supports multiple media streams</li>
+                <li>Used with RTCP for quality monitoring</li>
+            </ul>
+            
+            <p><strong>Common Uses:</strong> Video conferencing (Zoom, Teams, Google Meet), VoIP calls (WhatsApp, Skype), live streaming, IP cameras</p>
+            
+            <p><strong>In Our Router:</strong> RTP packets (ports 16384-32767) are automatically classified as <strong>High Priority (Real-time)</strong> because even small delays cause stuttering in video/audio calls.</p>
+        </div>
+    </div>
+
+    <!-- FTP Modal -->
+    <div id="ftp-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('ftp')">&times;</span>
+            <h2>📁 FTP (File Transfer Protocol)</h2>
+            <p><strong>Purpose:</strong> FTP is used for transferring files between computers on a network.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Uses two channels: command (port 21) and data (port 20)</li>
+                <li>Supports authentication and permissions</li>
+                <li>Can transfer large files efficiently</li>
+                <li>Active and passive transfer modes</li>
+            </ul>
+            
+            <p><strong>Common Uses:</strong> Website file uploads, software distribution, backup systems, large file sharing</p>
+            
+            <p><strong>In Our Router:</strong> FTP traffic on ports 20/21 is classified as <strong>Low Priority (Bulk)</strong> because file transfers are not time-sensitive and can tolerate delays without affecting user experience.</p>
+        </div>
+    </div>
+
+    <!-- ICMP Modal -->
+    <div id="icmp-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('icmp')">&times;</span>
+            <h2>🔍 ICMP (Internet Control Message Protocol)</h2>
+            <p><strong>Purpose:</strong> ICMP is used for network diagnostics and error reporting.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Network layer protocol (part of IP suite)</li>
+                <li>No ports (not TCP/UDP)</li>
+                <li>Used for error messages and queries</li>
+                <li>Essential for network troubleshooting</li>
+            </ul>
+            
+            <p><strong>Common Uses:</strong> Ping (network reachability test), Traceroute (path discovery), error notifications (destination unreachable, time exceeded)</p>
+            
+            <p><strong>In Our Router:</strong> ICMP packets are typically classified as <strong>Medium Priority (Interactive)</strong> as they're important for network health monitoring but not as critical as real-time media.</p>
+        </div>
+    </div>
+
+    <script>
+        function showModal(type) {
+            document.getElementById(type + '-modal').style.display = 'block';
+        }
+        
+        function closeModal(type) {
+            document.getElementById(type + '-modal').style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

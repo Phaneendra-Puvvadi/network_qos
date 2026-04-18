@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn - Network QoS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">🌐 Network QoS Router</a>
+        <div class="navbar-menu">
+            <a href="/">🏠 Home</a>
+            <a href="/learn">📚 Learn</a>
+            <a href="/team">👥 Developed By</a>
+            <a href="/help">❓ Help</a>
+            <a href="/download-report" class="btn">📥 Download Report</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>📚 Learn About Network QoS</h1>
+            <p>Understanding Congestion Control and Traffic Prioritization</p>
+        </div>
+
+        <div class="learn-content">
+            <h2>🎯 What is Network Congestion?</h2>
+            <p>Network congestion occurs when too many packets try to travel through a network simultaneously, exceeding the available bandwidth. This causes:</p>
+            <ul>
+                <li><strong>Packet Loss:</strong> Routers drop packets when buffers are full</li>
+                <li><strong>Increased Latency:</strong> Packets wait longer in queues</li>
+                <li><strong>Reduced Throughput:</strong> Overall network performance degrades</li>
+                <li><strong>Poor User Experience:</strong> Video calls stutter, web pages load slowly</li>
+            </ul>
+
+            <h2>🔍 Our Solution: Adaptive Traffic Prioritization</h2>
+            <p>Traditional routers treat all packets equally or use static priority rules. Our system is <strong>adaptive</strong> - it predicts congestion before it happens and dynamically adjusts priorities to protect time-sensitive applications.</p>
+
+            <h2>📦 Types of Network Packets</h2>
+            
+            <div class="packet-types">
+                <div class="packet-type">
+                    <div class="packet-icon">📞</div>
+                    <h3>Real-time (UDP)</h3>
+                    <p><strong>Priority:</strong> High</p>
+                    <p>Video calls, VoIP, gaming - require low latency</p>
+                </div>
+
+                <div class="packet-type">
+                    <div class="packet-icon">🌐</div>
+                    <h3>Interactive (HTTP/HTTPS)</h3>
+                    <p><strong>Priority:</strong> Medium</p>
+                    <p>Web browsing, email, APIs - moderately time-sensitive</p>
+                </div>
+
+                <div class="packet-type">
+                    <div class="packet-icon">📁</div>
+                    <h3>Bulk (TCP)</h3>
+                    <p><strong>Priority:</strong> Low</p>
+                    <p>File downloads, backups - can tolerate delays</p>
+                </div>
+
+                <div class="packet-type">
+                    <div class="packet-icon">🔗</div>
+                    <h3>TCP Packets</h3>
+                    <p><strong>Protocol:</strong> Reliable</p>
+                    <p>Connection-oriented with guaranteed delivery</p>
+                </div>
+
+                <div class="packet-type">
+                    <div class="packet-icon">📡</div>
+                    <h3>UDP Packets</h3>
+                    <p><strong>Protocol:</strong> Fast</p>
+                    <p>Connectionless, minimal overhead</p>
+                </div>
+
+                <div class="packet-type">
+                    <div class="packet-icon">🔍</div>
+                    <h3>ICMP Packets</h3>
+                    <p><strong>Purpose:</strong> Diagnostics</p>
+                    <p>Ping, traceroute, error reporting</p>
+                </div>
+            </div>
+
+            <h2>⚙️ How Congestion Control Works</h2>
+            <p>Our system uses a three-factor congestion score to predict network stress:</p>
+            
+            <div class="step">
+                <h3>1. Link Utilization (50% weight)</h3>
+                <p>Measures how much bandwidth is being used. Formula: (Current Traffic / Total Bandwidth)</p>
+                <p><strong>Example:</strong> 6 Mbps traffic on 8 Mbps link = 75% utilization</p>
+            </div>
+
+            <div class="step">
+                <h3>2. Queue Occupancy (30% weight)</h3>
+                <p>Tracks how full the packet buffers are. Formula: (Packets in Queue / Max Queue Size)</p>
+                <p><strong>Example:</strong> 900 packets in queue with 1500 max = 60% occupancy</p>
+            </div>
+
+            <div class="step">
+                <h3>3. Inter-arrival Time (20% weight)</h3>
+                <p>Detects traffic bursts by measuring gaps between packets.</p>
+                <p><strong>Example:</strong> Packets arriving every 2ms = high burst factor</p>
+            </div>
+
+            <p style="margin-top: 20px;"><strong>Final Score:</strong> Congestion Score = (0.5 × Utilization) + (0.3 × Queue) + (0.2 × Burst)</p>
+            <p><strong>When score > 0.6:</strong> System predicts congestion and adapts priorities!</p>
+
+            <h2>🎬 Educational Video</h2>
+            <p>Watch this comprehensive explanation of Quality of Service (QoS) in computer networks:</p>
+            
+            <div class="video-container">
+                <iframe 
+                    src="https://www.youtube.com/embed/cPUkvKraS_4?si=fOPtki6gx3ge_TJu" 
+                    title="Network fundamentals congestion&flow control"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <h2>💡 Key Innovations</h2>
+            <div class="packet-types">
+                <div class="packet-type" style="background: #f0fdf4; border-color: #10b981;">
+                    <h3>Predictive</h3>
+                    <p>Forecasts congestion 2-3 seconds before it occurs</p>
+                </div>
+                <div class="packet-type" style="background: #eff6ff; border-color: #3b82f6;">
+                    <h3>Lightweight</h3>
+                    <p>Uses EWMA instead of heavy ML models</p>
+                </div>
+                <div class="packet-type" style="background: #fef3c7; border-color: #f59e0b;">
+                    <h3>Fair</h3>
+                    <p>No packet starvation - all traffic gets served</p>
+                </div>
+            </div>
+
+            <h2>📊 Performance Metrics</h2>
+            <ul>
+                <li><strong>Latency Reduction:</strong> 30-40% for real-time traffic during congestion</li>
+                <li><strong>Prediction Accuracy:</strong> 60-70% congestion detection rate</li>
+                <li><strong>Packet Loss:</strong> <5% for high-priority flows under heavy load</li>
+                <li><strong>Processing Overhead:</strong> <1ms per packet classification</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Adaptive Network Traffic Prioritization System</strong></p>
+        <p>&copy; 2026 | All Rights Reserved</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Build files
+
+*.o
+network_qos
+
+# Logs
+
+logs/
+
+# Python cache
+
+**pycache**/
+*.pyc
+
+# System files
+
+.DS_Store
+Thumbs.db
+

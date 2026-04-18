@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - Network QoS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <<nav class="navbar">
+        <a href="/" class="navbar-brand">🌐 Network QoS Router</a>
+        <div class="navbar-menu">
+            <a href="/">🏠 Home</a>
+            <a href="/learn">📚 Learn</a>
+            <a href="/team">👥 Developed By</a>
+            <a href="/help">❓ Help</a>
+            <a href="/download-report" class="btn">📥 Download Report</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>❓ How to Use This System</h1>
+            <p>Complete setup and usage guide for Linux</p>
+        </div>
+
+        <div class="help-section">
+            <h2>📋 Prerequisites</h2>
+            <p>Before starting, ensure you have:</p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>Linux system (Ubuntu, Kali, or similar)</li>
+                <li>Terminal access with sudo privileges</li>
+                <li>Internet connection for package installation</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h2>📦 Step 1: Install Required Packages</h2>
+            <p>Open terminal and run this command:</p>
+            <div class="command-box">
+                <code>sudo apt-get update && sudo apt-get install -y build-essential libpcap-dev iperf3 net-tools iproute2 tcpdump wireshark python3 python3-pip libjson-c-dev</code>
+            </div>
+            <p>Install Python packages:</p>
+            <div class="command-box">
+                <code>pip3 install flask reportlab --break-system-packages</code>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>🔧 Step 2: Setup Network Environment</h2>
+            <p>Create virtual network namespaces:</p>
+            <div class="command-box">
+                <code>cd ~/network_qos<br>./setup_network.sh</code>
+            </div>
+            <p>You should see confirmation:</p>
+            <div class="command-box">
+                <code>=== Network setup complete ===<br>Client: 10.0.1.2<br>Router: 10.0.1.1 / 10.0.2.1<br>Server: 10.0.2.2</code>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>🚀 Step 3: Start the Router</h2>
+            <p><strong>Terminal 1:</strong> Run the router program</p>
+            <div class="command-box">
+                <code>sudo ip netns exec router ./network_qos</code>
+            </div>
+            <p>Expected output:</p>
+            <div class="command-box">
+                <code>Router running. Press Ctrl+C to stop.</code>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>🌐 Step 4: Start Web Dashboard</h2>
+            <p><strong>Terminal 2:</strong> Start the web server</p>
+            <div class="command-box">
+                <code>cd ~/network_qos/web<br>python3 server.py</code>
+            </div>
+            <p>Open browser and navigate to:</p>
+            <div class="command-box">
+                <code>http://localhost:5000</code>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>🔍 Step 5: Start Wireshark (Optional)</h2>
+            <p><strong>Terminal 3:</strong> Monitor packets with Wireshark</p>
+            <div class="command-box">
+                <code>sudo ip netns exec router wireshark</code>
+            </div>
+            <p>In Wireshark:</p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>Select interface: <strong>veth-router1</strong></li>
+                <li>Click "Start" to begin capture</li>
+                <li>Apply display filter: <code>ip</code></li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h2>📡 Step 6: Start iperf3 Servers</h2>
+            <p>Open 6 new terminals and run ONE command in each:</p>
+            
+            <div class="step">
+                <h3>Terminal 4:</h3>
+                <div class="command-box"><code>sudo ip netns exec server iperf3 -s -p 5000</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 5:</h3>
+                <div class="command-box"><code>sudo ip netns exec server iperf3 -s -p 20000</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 6:</h3>
+                <div class="command-box"><code>sudo ip netns exec server iperf3 -s -p 443</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 7:</h3>
+                <div class="command-box"><code>sudo ip netns exec server iperf3 -s -p 80</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 8:</h3>
+                <div class="command-box"><code>sudo ip netns exec server iperf3 -s -p 21</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 9:</h3>
+                <div class="command-box"><code>sudo ip netns exec server iperf3 -s -p 5201</code></div>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>🚦 Step 7: Generate Traffic (Clients)</h2>
+            <p>Open 6 MORE terminals and run these commands to generate traffic:</p>
+            
+            <div class="step">
+                <h3>Terminal 10: High Priority Traffic (Video Call)</h3>
+                <div class="command-box"><code>sudo ip netns exec client iperf3 -c 10.0.2.2 -u -b 3M -p 5000 -t 120 -l 200</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 11: High Priority Traffic (VoIP)</h3>
+                <div class="command-box"><code>sudo ip netns exec client iperf3 -c 10.0.2.2 -u -b 3M -p 20000 -t 120 -l 300</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 12: Medium Priority Traffic (HTTPS)</h3>
+                <div class="command-box"><code>sudo ip netns exec client iperf3 -c 10.0.2.2 -u -b 2M -p 443 -t 120 -l 800</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 13: Medium Priority Traffic (HTTP)</h3>
+                <div class="command-box"><code>sudo ip netns exec client iperf3 -c 10.0.2.2 -u -b 2M -p 80 -t 120 -l 600</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 14: Low Priority Traffic (FTP)</h3>
+                <div class="command-box"><code>sudo ip netns exec client iperf3 -c 10.0.2.2 -b 8M -p 21 -t 120</code></div>
+            </div>
+
+            <div class="step">
+                <h3>Terminal 15: Low Priority Traffic (Download)</h3>
+                <div class="command-box"><code>sudo ip netns exec client iperf3 -c 10.0.2.2 -b 8M -p 5201 -t 120 -l 1450</code></div>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>👀 Step 8: Watch the Dashboard</h2>
+            <p>In your web browser at <code>http://localhost:5000</code>, you should now see:</p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>✅ All 3 queue bars filling up (Red, Yellow, Green)</li>
+                <li>📈 Congestion score rising above 0.6</li>
+                <li>⚠️ Status changing to "CONGESTED" (red)</li>
+                <li>📊 Real-time graph showing score fluctuations</li>
+                <li>🔢 Packets/second counter increasing</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h2>⏸️ Step 9: Stop Traffic</h2>
+            <p>After 2 minutes (120 seconds), all traffic will stop automatically.</p>
+            <p><strong>Watch the dashboard:</strong></p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>Queues should drain to 0 within 3-5 seconds</li>
+                <li>Congestion score drops back below 0.6</li>
+                <li>Status returns to "NORMAL" (green)</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h2>🛑 Step 10: Cleanup</h2>
+            <p>When finished, stop all programs:</p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>Press <code>Ctrl+C</code> in Terminal 1 (router)</li>
+                <li>Press <code>Ctrl+C</code> in Terminal 2 (web server)</li>
+                <li>Close all iperf3 terminals</li>
+            </ul>
+            <p>Clean up network namespaces:</p>
+            <div class="command-box">
+                <code>cd ~/network_qos<br>./cleanup_network.sh</code>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>📥 Step 11: Download Report</h2>
+            <p>Click the "Download Report" button in the top menu to generate a PDF report with:</p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>Total packets processed</li>
+                <li>Current congestion status</li>
+                <li>Queue statistics</li>
+                <li>Timestamp of simulation</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h2>❗ Troubleshooting</h2>
+            <div class="step">
+                <h3>Problem: "Permission denied" errors</h3>
+                <p><strong>Solution:</strong> Make sure you're using <code>sudo</code> for all network commands</p>
+            </div>
+
+            <div class="step">
+                <h3>Problem: Dashboard shows all zeros</h3>
+                <p><strong>Solution:</strong> Ensure router is running (Terminal 1) before generating traffic</p>
+            </div>
+
+            <div class="step">
+                <h3>Problem: iperf3 "Connection refused"</h3>
+                <p><strong>Solution:</strong> Start servers (Terminals 4-9) BEFORE running clients (Terminals 10-15)</p>
+            </div>
+
+            <div class="step">
+                <h3>Problem: Queues not draining</h3>
+                <p><strong>Solution:</strong> Wait 3-5 seconds after traffic stops. System auto-drains queues.</p>
+            </div>
+        </div>
+        <div class="step">
+                <p> Again to come back to dashboard click on network Qos router</p>
+            </div>
+
+        <div class="card" style="background: #f0fdf4; border-left: 4px solid #10b981; margin-top: 30px;">
+            <h2 style="color: #10b981;">💡 Quick Demo Mode</h2>
+            <p style="color: #333;">For a quick demonstration, use the automated script:</p>
+            <div class="command-box">
+                <code>cd ~/network_qos<br>./start_demo_traffic.sh</code>
+            </div>
+            <p style="color: #333; margin-top: 15px;">This automatically starts all servers and clients for a 5-minute demo.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Adaptive Network Traffic Prioritization System</strong></p>
+        <p>&copy; 2026 | All Rights Reserved</p>
+    </div>
+</body>
+</html>

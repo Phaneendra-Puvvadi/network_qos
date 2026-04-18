@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network QoS Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .metric {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        .label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .status {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .status.normal {
+            background: #10b981;
+            color: white;
+        }
+        .status.congested {
+            background: #ef4444;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .queue-bar {
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+        .queue-fill {
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .queue-fill.high {
+            background: #ef4444;
+        }
+        .queue-fill.medium {
+            background: #f59e0b;
+        }
+        .queue-fill.low {
+            background: #10b981;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+        .chart-container h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    	<nav style="background: white; border-radius: 15px; padding: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+            <a href="/" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">📊 Dashboard</a>
+            <a href="/packets" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">📦 Packet Types</a>
+            <a href="/simulation" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">🎯 How It Works</a>
+            <a href="/about" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">ℹ️ About Project</a>
+        </nav>
+        
+        <h1>🌐 Network QoS Router Dashboard</h1>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>Congestion Status</h2>
+                <span id="status" class="status normal">NORMAL</span>
+                <div class="label">Current State</div>
+            </div>
+            
+            <div class="card">
+                <h2>Congestion Score</h2>
+                <div class="metric" id="score">0.00</div>
+                <div class="label">Threshold: 0.60</div>
+            </div>
+            
+            <div class="card">
+                <h2>Packets/Second</h2>
+                <div class="metric" id="pps">0</div>
+                <div class="label">Current Rate</div>
+            </div>
+            
+            <div class="card">
+                <h2>Total Packets</h2>
+                <div class="metric" id="total-packets">0</div>
+                <div class="label">Since Start</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Queue Status</h2>
+            <div>
+                <strong style="color: #ef4444;">High Priority (Real-time)</strong>
+                <div class="queue-bar">
+                    <div class="queue-fill high" id="queue-high" style="width: 0%">0</div>
+                </div>
+            </div>
+            <div>
+                <strong style="color: #f59e0b;">Medium Priority (Interactive)</strong>
+                <div class="queue-bar">
+                    <div class="queue-fill medium" id="queue-medium" style="width: 0%">0</div>
+                </div>
+            </div>
+            <div>
+                <strong style="color: #10b981;">Low Priority (Bulk)</strong>
+                <div class="queue-bar">
+                    <div class="queue-fill low" id="queue-low" style="width: 0%">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>Congestion Score Over Time</h2>
+            <canvas id="scoreChart"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        const scoreHistory = [];
+        const timeLabels = [];
+        const maxDataPoints = 50;
+        
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'Congestion Score',
+                    data: scoreHistory,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Threshold (0.6)',
+                    data: Array(maxDataPoints).fill(0.6),
+                    borderColor: '#ef4444',
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1.0
+                    }
+                }
+            }
+        });
+        
+        function updateDashboard() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update status
+                    const statusEl = document.getElementById('status');
+                    if (data.congestion_predicted) {
+                        statusEl.textContent = 'CONGESTED';
+                        statusEl.className = 'status congested';
+                    } else {
+                        statusEl.textContent = 'NORMAL';
+                        statusEl.className = 'status normal';
+                    }
+                    
+                    // Update metrics
+                    document.getElementById('score').textContent = data.congestion_score.toFixed(3);
+                    document.getElementById('pps').textContent = Math.round(data.packets_per_sec);
+                    document.getElementById('total-packets').textContent = data.total_packets || 0;
+                    
+                    // Update queues
+                    const maxQueue = 1000;
+                    const highPct = (data.queues.high / maxQueue) * 100;
+                    const medPct = (data.queues.medium / maxQueue) * 100;
+                    const lowPct = (data.queues.low / maxQueue) * 100;
+                    
+                    document.getElementById('queue-high').style.width = highPct + '%';
+                    document.getElementById('queue-high').textContent = data.queues.high;
+                    
+                    document.getElementById('queue-medium').style.width = medPct + '%';
+                    document.getElementById('queue-medium').textContent = data.queues.medium;
+                    
+                    document.getElementById('queue-low').style.width = lowPct + '%';
+                    document.getElementById('queue-low').textContent = data.queues.low;
+                    
+                    // Update chart
+                    const now = new Date().toLocaleTimeString();
+                    scoreHistory.push(data.congestion_score);
+                    timeLabels.push(now);
+                    
+                    if (scoreHistory.length > maxDataPoints) {
+                        scoreHistory.shift();
+                        timeLabels.shift();
+                    }
+                    
+                    chart.update();
+                })
+                .catch(err => console.error('Error fetching stats:', err));
+        }
+        
+        // Update every second
+        setInterval(updateDashboard, 1000);
+        updateDashboard();
+    </script>
+</body>
+</html>
