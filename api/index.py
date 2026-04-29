@@ -28,17 +28,26 @@ def help_page():
 
 @app.route('/api/stats')
 def get_stats():
+    import random
+    import time
+    
+    # Simulate live data for demo
+    base_score = 0.3 + (random.random() * 0.4)
+    
     return jsonify({
-        'timestamp': 0,
-        'congestion_score': 0.45,
-        'congestion_predicted': False,
-        'queues': {'high': 0, 'medium': 0, 'low': 0},
-        'packets_per_sec': 0,
-        'bytes_per_sec': 0,
-        'total_packets': 0,
-        'total_bytes': 0
+        'timestamp': int(time.time()),
+        'congestion_score': round(base_score, 3),
+        'congestion_predicted': base_score > 0.6,
+        'queues': {
+            'high': random.randint(0, 50),
+            'medium': random.randint(0, 100),
+            'low': random.randint(0, 150)
+        },
+        'packets_per_sec': random.randint(100, 500),
+        'bytes_per_sec': random.randint(50000, 200000),
+        'total_packets': random.randint(1000, 5000),
+        'total_bytes': random.randint(500000, 2000000)
     })
-
 @app.route('/download-report')
 def download_report():
     from io import BytesIO
