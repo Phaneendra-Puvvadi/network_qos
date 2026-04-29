@@ -62,6 +62,9 @@ Open: http://localhost:5000
 
 ---
 
+### LIVE DEPLOY LINK
+https://network-qos.vercel.app
+
 ## Quick Demo (Recommended)
 
 Instead of manual setup:
@@ -77,4 +80,5 @@ sudo ./start_demo_traffic.sh
 ```bash
 sudo ./cleanup_network.sh
 ```
+
 
